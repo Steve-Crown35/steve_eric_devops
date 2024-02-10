@@ -1,0 +1,28 @@
+version: '3'
+
+services:
+  rocketchat:
+    image: rocketchat/rocket.chat:6.5.2
+    restart: unless-stopped
+    ports:
+      - "3030:3000"
+    environment:
+      - ROOT_URL=http://localhost:3000
+      - MONGO_URL=mongodb://mongo:27017/rocketchat
+      - MONGO_OPLOG_URL=mongodb://mongo:27017/local
+    depends_on:
+      - mongo
+    networks:
+      - rocketchat
+
+  mongo:
+    image: mongo:4.0
+    restart: unless-stopped
+    volumes:
+      - ./data/db:/data/db
+    command: mongod --oplogSize 128 --replSet rs0 --storageEngine=mmapv1
+    networks:
+      - rocketchat
+
+networks:
+  rocketchat:
